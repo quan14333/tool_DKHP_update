@@ -1,15 +1,43 @@
 export const $ = (selector) => document.querySelector(selector);
 export const $$ = (selector) => document.querySelectorAll(selector);
 
-export function parseScheduleDateTime(dateStr, timeStr) {
-  if (!dateStr && !timeStr) {
+function parseTimePart(value, label, min, max) {
+  if (value === "") {
+    return { valid: false, error: `Vui lòng nhập ${label}.` };
+  }
+
+  if (!/^\d{1,2}$/.test(value)) {
+    return { valid: false, error: `${label} không hợp lệ.` };
+  }
+
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < min || number > max) {
+    return {
+      valid: false,
+      error: `${label} phải từ ${String(min).padStart(2, "0")} đến ${String(max).padStart(2, "0")}.`,
+    };
+  }
+
+  return { valid: true, value: number };
+}
+
+export function parseScheduleDateTime(dateStr, hourStr, minuteStr, secondStr) {
+  const hasDate = Boolean(dateStr);
+  const hasHour = hourStr !== "";
+  const hasMinute = minuteStr !== "";
+  const hasSecond = secondStr !== "";
+  const hasAnyTime = hasHour || hasMinute || hasSecond;
+  const hasAllTime = hasHour && hasMinute && hasSecond;
+
+  if (!hasDate && !hasAnyTime) {
     return { valid: true, optional: true };
   }
 
-  if (!dateStr || !timeStr) {
+  if (!hasDate || !hasAllTime) {
     return {
       valid: false,
-      error: "Vui lòng nhập đầy đủ ngày và giờ, hoặc để trống cả hai.",
+      error:
+        "Vui lòng nhập đầy đủ ngày, giờ, phút và giây, hoặc để trống cả phần hẹn giờ.",
     };
   }
 
@@ -18,29 +46,21 @@ export function parseScheduleDateTime(dateStr, timeStr) {
     return { valid: false, error: "Ngày không hợp lệ." };
   }
 
-  const timeMatch = timeStr.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
-  if (!timeMatch) {
-    return { valid: false, error: "Giờ không hợp lệ." };
-  }
+  const hourResult = parseTimePart(hourStr, "Giờ", 0, 23);
+  if (!hourResult.valid) return hourResult;
+
+  const minuteResult = parseTimePart(minuteStr, "Phút", 0, 59);
+  if (!minuteResult.valid) return minuteResult;
+
+  const secondResult = parseTimePart(secondStr, "Giây", 0, 59);
+  if (!secondResult.valid) return secondResult;
 
   const year = Number(dateMatch[1]);
   const month = Number(dateMatch[2]);
   const day = Number(dateMatch[3]);
-  const hour = Number(timeMatch[1]);
-  const minute = Number(timeMatch[2]);
-  const second = Number(timeMatch[3] || 0);
-
-  if (
-    month < 1 ||
-    month > 12 ||
-    day < 1 ||
-    day > 31 ||
-    hour > 23 ||
-    minute > 59 ||
-    second > 59
-  ) {
-    return { valid: false, error: "Ngày giờ không hợp lệ." };
-  }
+  const hour = hourResult.value;
+  const minute = minuteResult.value;
+  const second = secondResult.value;
 
   const scheduledAt = new Date(
     year,
@@ -76,14 +96,15 @@ export function parseScheduleDateTime(dateStr, timeStr) {
 }
 
 export function formatScheduleDateTime(timestamp) {
-  return new Date(timestamp).toLocaleString("vi-VN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  const date = new Date(timestamp);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+  const second = String(date.getSeconds()).padStart(2, "0");
+
+  return `${day}/${month}/${year} ${hour}:${minute}:${second}`;
 }
 
 export function formatCountdown(ms) {
@@ -97,4 +118,22 @@ export function formatCountdown(ms) {
   return [hours, minutes, seconds]
     .map((value) => String(value).padStart(2, "0"))
     .join(":");
+}
+
+export function padTimeInput(value) {
+  if (value === "") return "";
+  return String(Number(value)).padStart(2, "0");
+}
+
+export function parseLegacyScheduleTime(timeStr) {
+  if (!timeStr) return null;
+
+  const match = timeStr.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
+  if (!match) return null;
+
+  return {
+    hour: match[1],
+    minute: match[2],
+    second: match[3] || "00",
+  };
 }

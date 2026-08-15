@@ -3,6 +3,8 @@ import {
   parseScheduleDateTime,
   formatScheduleDateTime,
   formatCountdown,
+  padTimeInput,
+  parseLegacyScheduleTime,
 } from "./utils.js";
 
 const submitBtn = $("#submit_btn");
@@ -10,8 +12,16 @@ const scheduleBtn = $("#schedule_btn");
 const cancelScheduleBtn = $("#cancel_schedule_btn");
 const textarea = $("textarea");
 const scheduleDateInput = $("#schedule_date");
-const scheduleTimeInput = $("#schedule_time");
+const scheduleHourInput = $("#schedule_hour");
+const scheduleMinuteInput = $("#schedule_minute");
+const scheduleSecondInput = $("#schedule_second");
 const scheduleStatus = $("#schedule_status");
+
+const timeInputs = [
+  scheduleHourInput,
+  scheduleMinuteInput,
+  scheduleSecondInput,
+];
 
 const DKHP_URL_PATTERNS = [
   "https://dkhp.uit.edu.vn/*",
@@ -70,9 +80,26 @@ function updateCountdown(scheduledAt) {
   countdownIntervalId = setInterval(tick, 1000);
 }
 
+function getScheduleDraft() {
+  return {
+    scheduleDate: scheduleDateInput.value,
+    scheduleHour: scheduleHourInput.value.trim(),
+    scheduleMinute: scheduleMinuteInput.value.trim(),
+    scheduleSecond: scheduleSecondInput.value.trim(),
+  };
+}
+
 function loadSavedData() {
   chrome.storage?.local?.get(
-    ["subjects", "scheduleDate", "scheduleTime", "scheduledAt"],
+    [
+      "subjects",
+      "scheduleDate",
+      "scheduleHour",
+      "scheduleMinute",
+      "scheduleSecond",
+      "scheduleTime",
+      "scheduledAt",
+    ],
     (result) => {
       if (result?.subjects) {
         textarea.value = result.subjects;
@@ -80,9 +107,20 @@ function loadSavedData() {
       if (result?.scheduleDate) {
         scheduleDateInput.value = result.scheduleDate;
       }
-      if (result?.scheduleTime) {
-        scheduleTimeInput.value = result.scheduleTime;
+
+      if (result?.scheduleHour !== undefined) {
+        scheduleHourInput.value = result.scheduleHour;
+        scheduleMinuteInput.value = result.scheduleMinute || "";
+        scheduleSecondInput.value = result.scheduleSecond || "";
+      } else if (result?.scheduleTime) {
+        const legacyTime = parseLegacyScheduleTime(result.scheduleTime);
+        if (legacyTime) {
+          scheduleHourInput.value = legacyTime.hour;
+          scheduleMinuteInput.value = legacyTime.minute;
+          scheduleSecondInput.value = legacyTime.second;
+        }
       }
+
       if (result?.scheduledAt && result.scheduledAt > Date.now()) {
         updateCountdown(result.scheduledAt);
       } else if (result?.scheduledAt) {
@@ -94,10 +132,16 @@ function loadSavedData() {
 }
 
 function saveDraftSchedule() {
-  chrome.storage?.local?.set({
-    scheduleDate: scheduleDateInput.value,
-    scheduleTime: scheduleTimeInput.value,
-  });
+  chrome.storage?.local?.set(getScheduleDraft());
+}
+
+function normalizeTimeInput(input) {
+  input.value = input.value.replace(/\D/g, "").slice(0, 2);
+}
+
+function padTimeInputOnBlur(input) {
+  if (input.value === "") return;
+  input.value = padTimeInput(input.value);
 }
 
 function registerNow() {
@@ -122,9 +166,13 @@ function scheduleRegistration() {
     return;
   }
 
+  timeInputs.forEach(padTimeInputOnBlur);
+
   const validation = parseScheduleDateTime(
     scheduleDateInput.value,
-    scheduleTimeInput.value
+    scheduleHourInput.value,
+    scheduleMinuteInput.value,
+    scheduleSecondInput.value
   );
 
   if (!validation.valid) {
@@ -134,17 +182,18 @@ function scheduleRegistration() {
 
   if (validation.optional) {
     setScheduleStatus(
-      "Vui lòng nhập ngày và giờ để hẹn đăng ký tự động.",
+      "Vui lòng nhập đầy đủ ngày, giờ, phút và giây để hẹn đăng ký tự động.",
       "error"
     );
     return;
   }
 
+  const draft = getScheduleDraft();
+
   chrome.storage.local.set(
     {
       subjects: textarea.value,
-      scheduleDate: scheduleDateInput.value,
-      scheduleTime: scheduleTimeInput.value,
+      ...draft,
       scheduledAt: validation.scheduledAt,
     },
     () => {
@@ -171,7 +220,17 @@ textarea.addEventListener("input", () => {
 });
 
 scheduleDateInput.addEventListener("change", saveDraftSchedule);
-scheduleTimeInput.addEventListener("change", saveDraftSchedule);
+
+for (const input of timeInputs) {
+  input.addEventListener("input", () => {
+    normalizeTimeInput(input);
+    saveDraftSchedule();
+  });
+  input.addEventListener("change", () => {
+    padTimeInputOnBlur(input);
+    saveDraftSchedule();
+  });
+}
 
 submitBtn.addEventListener("click", registerNow);
 scheduleBtn.addEventListener("click", scheduleRegistration);

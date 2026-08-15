@@ -28,30 +28,62 @@ body {
 }
 
 .schedule-inputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
   margin-bottom: 8px;
 }
 
-.schedule-inputs label {
+.schedule-date-field {
   display: flex;
   flex-direction: column;
   gap: 4px;
   font-size: 13px;
 }
 
-.schedule-inputs input {
+.schedule-time-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.schedule-time-row label,
+.schedule-date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.schedule-inputs input,
+.schedule-time-row input {
   width: 100%;
   padding: 8px;
   border: 2px solid gainsboro;
   border-radius: 4px;
   outline: none;
   font-size: 14px;
+  text-align: center;
 }
 
-.schedule-inputs input:focus {
+.schedule-date-field input {
+  text-align: left;
+}
+
+.schedule-inputs input:focus,
+.schedule-time-row input:focus {
   border-color: #53b7ff;
+}
+
+.field-hint {
+  color: #888;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.schedule-format-hint {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
 }
 
 .schedule-status {
