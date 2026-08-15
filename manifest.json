@@ -2,10 +2,13 @@
   "$schema": "https://json.schemastore.org/chrome-manifest",
 
   "name": "Tool Đăng ký học phần UIT",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Tool đăng ký học phần UIT mới",
   "author": "tuankietcoder",
-  "permissions": ["storage"],
+  "permissions": ["storage", "alarms", "tabs"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "host_permissions": [
     "https://dkhp.uit.edu.vn/*",
     "http://127.0.0.1:5173/*",

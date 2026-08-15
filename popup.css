@@ -15,6 +15,94 @@ body {
   width: 400px;
 }
 
+#schedule_section {
+  margin-bottom: 1rem;
+}
+
+.schedule-label {
+  margin-bottom: 8px;
+}
+
+.schedule-label small {
+  color: #666;
+}
+
+.schedule-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.schedule-inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.schedule-inputs input {
+  width: 100%;
+  padding: 8px;
+  border: 2px solid gainsboro;
+  border-radius: 4px;
+  outline: none;
+  font-size: 14px;
+}
+
+.schedule-inputs input:focus {
+  border-color: #53b7ff;
+}
+
+.schedule-status {
+  min-height: 20px;
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #1679e3;
+}
+
+.schedule-status.error {
+  color: #d32f2f;
+}
+
+.schedule-status.success {
+  color: #2e7d32;
+}
+
+.schedule-actions {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.button-82-edge.schedule {
+  background: linear-gradient(
+    to left,
+    #0d8f5f 0%,
+    #0a7a51 8%,
+    #3ecf8e 92%,
+    #7ee8b8 100%
+  );
+}
+
+.button-82-front.schedule {
+  background: hsl(152, 65%, 42%);
+}
+
+.button-82-edge.cancel {
+  background: linear-gradient(
+    to left,
+    #b71c1c 0%,
+    #c62828 8%,
+    #ef5350 92%,
+    #ffcdd2 100%
+  );
+}
+
+.button-82-front.cancel {
+  background: hsl(0, 65%, 50%);
+}
+
 textarea {
   min-height: 200px;
   width: 100%;

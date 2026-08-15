@@ -17,11 +17,41 @@
           autofocus
           placeholder='Dán vào đây (mỗi môn 1 dòng hoặc cách nhau bằng dấu phẩy)&#10Ví dụ: SE358.O11.PMCL,SE100.O12.PMCL&#10hoặc&#10SE358.O11.PMCL&#10SE100.O12.PMCL&#10'
         ></textarea>
+        <div id="schedule_section">
+          <p class="schedule-label">Hẹn giờ đăng ký <small>(không bắt buộc)</small></p>
+          <div class="schedule-inputs">
+            <label>
+              <span>Ngày</span>
+              <input type="date" id="schedule_date" />
+            </label>
+            <label>
+              <span>Giờ</span>
+              <input type="time" id="schedule_time" step="1" />
+            </label>
+          </div>
+          <p id="schedule_status" class="schedule-status"></p>
+          <div class="schedule-actions">
+            <button class="button-82-pushable" role="button" id="schedule_btn">
+              <span class="button-82-shadow"></span>
+              <span class="button-82-edge schedule"></span>
+              <span class="button-82-front schedule">
+                Hẹn giờ đăng ký
+              </span>
+            </button>
+            <button class="button-82-pushable" role="button" id="cancel_schedule_btn">
+              <span class="button-82-shadow"></span>
+              <span class="button-82-edge cancel"></span>
+              <span class="button-82-front cancel">
+                Hủy hẹn giờ
+              </span>
+            </button>
+          </div>
+        </div>
         <button class="button-82-pushable" role="button" id="submit_btn">
           <span class="button-82-shadow"></span>
           <span class="button-82-edge"></span>
           <span class="button-82-front text">
-            Đăng ký
+            Đăng ký ngay
           </span>
         </button>
         <a href="https://tool-dang-ky-hoc-phan-uit-new-web-test.vercel.app" target="_blank" class="button-82-pushable" role="button" id="test">
